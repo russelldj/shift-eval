@@ -3,7 +3,7 @@ from pathlib import Path
 import geopandas as gpd
 import pandas as pd
 
-from tree_registration_and_matching.utils import ensure_height_is_present
+from tree_registration_and_matching.utils import ensure_height_is_present, is_overstory
 
 DATA_FOLDER = "/ofo-share/repos/david/shift-eval/data"
 OUTPUT_FOLDER = "/ofo-share/repos/david/shift-eval/formatted-data/"
@@ -45,6 +45,15 @@ for shift_file in shift_files:
     # Make sure height is present for visualization
     plot_trees = ensure_height_is_present(plot_trees)
 
+    # Remove trees which are explicitly marked as dead
+    live_trees = plot_trees.live_dead_status != "D"
+    plot_trees = plot_trees[live_trees]
+
+    # Ensure only overstory trees are present
+    overstory_trees = is_overstory(plot_trees)
+    plot_trees = plot_trees[overstory_trees]
+
+    # If there are fewer than 10 trees, do not proceed with saving the data
     if len(plot_trees) < 10:
         continue
 
