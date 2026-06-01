@@ -1,4 +1,4 @@
-import shutil
+import os
 from pathlib import Path
 import geopandas as gpd
 import pandas as pd
@@ -6,14 +6,14 @@ import pandas as pd
 from tree_registration_and_matching.utils import ensure_height_is_present, is_overstory
 
 DATA_FOLDER = "/ofo-share/repos/david/shift-eval/data"
-OUTPUT_FOLDER = "/ofo-share/repos/david/shift-eval/formatted-data/"
+OUTPUT_FOLDER = "/ofo-share/repos/david/shift-eval/formatted-data-6-1/"
 TREES_FILE = "/ofo-share/project-data/species-prediction-project/raw/ground-reference/ofo_ground-reference_trees.gpkg"
 
 APPLY_SHIFT = False
 
 SAVE_TREES = True
-SAVE_CHM = False
-SAVE_ORTHO = False
+SAVE_CHM = True
+SAVE_ORTHO = True
 
 trees = gpd.read_file(TREES_FILE)
 
@@ -25,8 +25,6 @@ for shift_file in shift_files:
     # TODO update this
     mission = shift_file.parts[-4]
     plot_id = shift_file.parts[-1].split("_")[1]
-
-    output_file = Path(OUTPUT_FOLDER, mission, f"0_{mission}_{plot_id}.gpkg")
 
     plot_id = shift_file.name.split("_")[1]
 
@@ -57,18 +55,21 @@ for shift_file in shift_files:
     if len(plot_trees) < 10:
         continue
 
-    output_file.parent.mkdir(exist_ok=True, parents=True)
+    # Create the output folder
+    Path(OUTPUT_FOLDER, mission).mkdir(exist_ok=True, parents=True)
 
     if SAVE_TREES:
+        output_file = Path(OUTPUT_FOLDER, mission, f"a_{mission}_{plot_id}.gpkg")
         plot_trees.to_file(output_file)
 
     if SAVE_CHM:
         input_CHM_file = Path(
             DATA_FOLDER, mission, "photogrammetry_03", "full", f"{mission}_chm-mesh.tif"
         )
-        output_CHM_file = Path(OUTPUT_FOLDER, mission, f"{mission}_chm.tif")
+        output_CHM_file = Path(OUTPUT_FOLDER, mission, f"b_{mission}_chm.tif")
 
-        shutil.copyfile(input_CHM_file, output_CHM_file)
+        output_CHM_file.unlink(missing_ok=True)
+        os.link(input_CHM_file, output_CHM_file)
 
     if SAVE_ORTHO:
         input_ortho_file = Path(
@@ -78,6 +79,7 @@ for shift_file in shift_files:
             "full",
             f"{mission}_ortho-dsm-ptcloud.tif",
         )
-        output_ortho_file = Path(OUTPUT_FOLDER, mission, f"{mission}_ortho.tif")
+        output_ortho_file = Path(OUTPUT_FOLDER, mission, f"c_{mission}_ortho.tif")
 
-        shutil.copyfile(input_ortho_file, output_ortho_file)
+        output_ortho_file.unlink(missing_ok=True)
+        os.link(input_ortho_file, output_ortho_file)
