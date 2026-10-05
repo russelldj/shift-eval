@@ -1,7 +1,5 @@
-from tree_registration_and_matching.utils import ensure_projected_CRS
 from tree_registration_and_matching.vis import plot_trees_on_raster
 import matplotlib.pyplot as plt
-import rasterio as rio
 
 import geopandas as gpd
 import pandas as pd
