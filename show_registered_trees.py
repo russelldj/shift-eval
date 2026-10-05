@@ -17,14 +17,15 @@ PLOT_BOUNDS_FILE = Path(
 df = pd.read_csv(ASSESSMENT_FILE)
 
 
-f, axs = plt.subplots(1, 2)
-f.set_figheight(6)
-f.set_figwidth(10)
-
 all_shifts = pd.read_csv(SHIFT_FILE)
 all_plot_bounds = gpd.read_file(PLOT_BOUNDS_FILE)
 
 for _, row in df.iterrows():
+    # Create figure and axes
+    f, axs = plt.subplots(1, 2)
+    f.set_figheight(6)
+    f.set_figwidth(10)
+
     drone_mission_id = int(row["Drone mission ID"])
     plot_id = int(row["Plot ID"])
     quality = row["Quality of alignment after registration"]
@@ -61,7 +62,7 @@ for _, row in df.iterrows():
     bounds.geometry = bounds.translate(xoff=x_shift, yoff=y_shift)
 
     plot_trees_on_raster(
-        CHM_file, trees, plot_bounds=bounds, ax=axs[0], add_colorbar=False
+        CHM_file, trees, plot_bounds=bounds, ax=axs[0], add_colorbar=True
     )
     plot_trees_on_raster(ortho_file, trees, plot_bounds=bounds, ax=axs[1])
 
@@ -76,3 +77,4 @@ for _, row in df.iterrows():
     # Clear the axes
     axs[0].clear()
     axs[1].clear()
+    f.clear()
